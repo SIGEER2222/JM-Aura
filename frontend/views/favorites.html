@@ -29,10 +29,10 @@
             </div>
 
             <!-- Results Grid -->
-            <div v-else class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
-                <div v-for="item in favorites" :key="item.album_id" 
+            <div v-else-if="visibleFavorites.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
+                <div v-for="item in visibleFavorites" :key="item.album_id" 
                      class="md-card overflow-hidden cursor-pointer group flex flex-col h-full transition-all duration-300"
-                     @click="viewDetails(item.album_id)">
+                     @click="openComicPage(item.album_id)">
                     <!-- Image Container -->
                     <div class="aspect-[3/4] overflow-hidden relative bg-surface-variant">
                          <img v-if="item.image" :src="getImageUrl(item.image)" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" alt="Cover">
@@ -51,12 +51,22 @@
                             <p class="text-xs truncate max-w-[60%] text-on-surface-variant">{{ item.author }}</p>
                             <span class="text-[10px] font-bold px-2 py-1 bg-surface-variant rounded-full text-on-surface-variant">{{ item.category }}</span>
                         </div>
+                        <button type="button" @click.stop="dislikeComic(item)"
+                            class="mt-3 h-8 rounded-full bg-surface-container text-on-surface-variant hover:bg-error-container hover:text-on-error-container transition text-[11px] font-bold flex items-center justify-center gap-1">
+                            <span class="material-symbols-rounded text-base">thumb_down</span>
+                            不喜欢
+                        </button>
                     </div>
                 </div>
             </div>
+            <div v-else-if="favorites.length > 0" class="flex flex-col items-center justify-center py-20 opacity-60">
+                <span class="material-symbols-rounded text-6xl text-outline mb-4">thumb_down</span>
+                <p class="font-medium text-on-surface-variant text-lg">收藏已被屏蔽</p>
+                <p class="text-sm text-on-surface-variant mt-2">不喜欢的作品不会再显示在这里</p>
+            </div>
             
             <!-- Pagination for Favorites -->
-            <div v-if="favorites.length > 0" class="flex justify-center items-center gap-6 py-8">
+            <div v-if="visibleFavorites.length > 0" class="flex justify-center items-center gap-6 py-8">
                  <button @click="changeFavPage(-1)" :disabled="favPage <= 1" 
                     class="w-12 h-12 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center disabled:opacity-30 hover:bg-primary hover:text-on-primary transition">
                     <span class="material-symbols-rounded">arrow_back</span>

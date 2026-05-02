@@ -125,16 +125,17 @@
                     </div>
 
                     <div v-else-if="!jmFavLoading && jmFavFilteredItems.length === 0" class="md-card p-8 md:p-10 flex flex-col items-center justify-center opacity-70">
-                        <span class="material-symbols-rounded text-6xl text-outline mb-3">search_off</span>
-                        <div class="font-bold text-on-surface-variant">没有匹配的标题</div>
-                        <button @click="jmFavTitleFilter=''" class="mt-5 h-10 px-6 rounded-full bg-surface-variant text-on-surface-variant hover:bg-primary hover:text-on-primary transition font-bold">清除筛选</button>
+                        <span class="material-symbols-rounded text-6xl text-outline mb-3">{{ jmFavTitleFilter.trim() ? 'search_off' : 'thumb_down' }}</span>
+                        <div class="font-bold text-on-surface-variant">{{ jmFavTitleFilter.trim() ? '没有匹配的标题' : '收藏已被屏蔽' }}</div>
+                        <button v-if="jmFavTitleFilter.trim()" @click="jmFavTitleFilter=''" class="mt-5 h-10 px-6 rounded-full bg-surface-variant text-on-surface-variant hover:bg-primary hover:text-on-primary transition font-bold">清除筛选</button>
+                        <div v-else class="text-xs opacity-60 mt-2">不喜欢的作品不会再显示在这里</div>
                     </div>
 
                     <div v-if="jmFavFilteredItems.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
                         <div v-for="item in jmFavFilteredItems" :key="item.album_id"
                             class="md-card overflow-hidden group flex flex-col h-full transition-all duration-300">
                             <div class="aspect-[3/4] overflow-hidden relative bg-surface-variant cursor-pointer"
-                                    @click="jmFavSelectionMode ? toggleJmFavSelectOne(item.album_id) : viewDetails(item.album_id)">
+                                    @click="jmFavSelectionMode ? toggleJmFavSelectOne(item.album_id) : openComicPage(item.album_id)">
                                 <img v-if="item.image" :src="getImageUrl(item.image)" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" alt="Cover">
                                 <div class="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                                 <div v-if="jmFavSelectionMode" class="absolute top-2 right-2 w-9 h-9 rounded-full border border-white/30 bg-black/30 flex items-center justify-center transition-transform active:scale-95">
@@ -143,7 +144,7 @@
                             </div>
                             <div class="p-3 flex flex-col flex-1">
                                 <div class="font-bold text-sm line-clamp-2 leading-tight mb-2 group-hover:text-primary transition-colors cursor-pointer"
-                                        @click="jmFavSelectionMode ? toggleJmFavSelectOne(item.album_id) : viewDetails(item.album_id)">
+                                        @click="jmFavSelectionMode ? toggleJmFavSelectOne(item.album_id) : openComicPage(item.album_id)">
                                     {{ item.title }}
                                 </div>
                                 <div class="text-xs opacity-70 truncate text-on-surface-variant">{{ item.author }}</div>
@@ -151,6 +152,10 @@
                                     <button @click="openJmMoveFavorite(item)" class="h-9 px-3 rounded-full bg-surface-variant text-on-surface-variant hover:bg-primary hover:text-on-primary transition text-xs font-bold">
                                         <span class="material-symbols-rounded text-base mr-1">drive_file_move</span>
                                         移动
+                                    </button>
+                                    <button @click.stop="dislikeComic(item)" class="h-9 px-3 rounded-full bg-surface-variant text-on-surface-variant hover:bg-error-container hover:text-on-error-container transition text-xs font-bold">
+                                        <span class="material-symbols-rounded text-base mr-1">thumb_down</span>
+                                        不喜欢
                                     </button>
                                     <button @click="removeJmFavorite(item)" class="w-9 h-9 rounded-full bg-surface-variant text-on-surface-variant hover:bg-error hover:text-on-error transition flex items-center justify-center">
                                         <span class="material-symbols-rounded text-base">remove_circle</span>

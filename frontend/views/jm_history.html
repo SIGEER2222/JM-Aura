@@ -74,10 +74,16 @@
                         <p class="font-medium text-on-surface-variant">暂无历史</p>
                     </div>
 
-                    <div v-if="jmHistoryItems.length > 0" class="md-card p-4 md:p-6 space-y-3">
-                        <div v-for="it in jmHistoryItems" :key="String(it.album_id || it.id || it)"
+                    <div v-if="jmHistoryItems.length > 0 && visibleJmHistoryItems.length === 0" class="md-card p-8 md:p-10 flex flex-col items-center justify-center opacity-70">
+                        <span class="material-symbols-rounded text-6xl text-outline mb-3">thumb_down</span>
+                        <div class="font-bold text-on-surface-variant">历史已被屏蔽</div>
+                        <div class="text-xs opacity-60 mt-2">不喜欢的作品不会再显示在这里</div>
+                    </div>
+
+                    <div v-if="visibleJmHistoryItems.length > 0" class="md-card p-4 md:p-6 space-y-3">
+                        <div v-for="it in visibleJmHistoryItems" :key="String(it.album_id || it.id || it)"
                             class="flex items-center gap-4 p-4 rounded-2xl bg-surface-container hover:bg-surface-container-high transition cursor-pointer"
-                            @click="viewDetails(String(it.album_id || it.id || ''))">
+                            @click="openComicPage(String(it.album_id || it.id || ''))">
                             <div class="w-14 h-14 rounded-xl overflow-hidden bg-surface-variant flex-shrink-0">
                                 <img v-if="it.image" :src="getImageUrl(it.image)" class="w-full h-full object-cover" loading="lazy">
                             </div>
@@ -85,6 +91,11 @@
                                 <div class="font-bold truncate text-on-surface">{{ it.title || it.name || 'Unknown' }}</div>
                                 <div class="text-xs opacity-60 mt-1 truncate">{{ it.author || '' }}</div>
                             </div>
+                            <button @click.stop="dislikeComic(it)"
+                                class="h-9 px-3 rounded-full bg-surface-variant text-on-surface-variant hover:bg-error-container hover:text-on-error-container transition text-xs font-bold">
+                                <span class="material-symbols-rounded text-base mr-1">thumb_down</span>
+                                不喜欢
+                            </button>
                             <span class="material-symbols-rounded text-outline">chevron_right</span>
                         </div>
 
@@ -109,14 +120,24 @@
                     <span class="material-symbols-rounded text-6xl text-outline mb-3">history</span>
                     <p class="font-medium text-on-surface-variant">暂无本地历史</p>
                 </div>
+                <div v-else-if="visibleJmLocalHistoryItems.length === 0" class="flex flex-col items-center justify-center py-14 opacity-60">
+                    <span class="material-symbols-rounded text-6xl text-outline mb-3">thumb_down</span>
+                    <p class="font-medium text-on-surface-variant">本地历史已被屏蔽</p>
+                    <p class="text-xs opacity-60 mt-2">不喜欢的作品不会再显示在这里</p>
+                </div>
 
                 <div v-else class="space-y-3">
-                    <div v-for="it in jmLocalHistoryItems" :key="it.album_id"
+                    <div v-for="it in visibleJmLocalHistoryItems" :key="it.album_id"
                         class="flex items-center gap-4 p-4 rounded-2xl bg-surface-container hover:bg-surface-container-high transition">
-                        <div class="min-w-0 flex-1 cursor-pointer" @click="viewDetails(it.album_id)">
+                        <div class="min-w-0 flex-1 cursor-pointer" @click="openComicPage(it.album_id)">
                             <div class="font-bold truncate">{{ it.album_title }}</div>
                             <div class="text-xs opacity-60 mt-1 truncate">Last: {{ it.title }}</div>
                         </div>
+                        <button @click.stop="dislikeComic(it)"
+                            class="h-9 px-3 rounded-full bg-surface-variant text-on-surface-variant hover:bg-error-container hover:text-on-error-container transition text-xs font-bold">
+                            <span class="material-symbols-rounded text-base mr-1">thumb_down</span>
+                            不喜欢
+                        </button>
                         <button @click.stop="removeHistoryItem(it.album_id)"
                             class="w-10 h-10 rounded-full bg-surface-variant text-on-surface-variant hover:bg-error hover:text-on-error transition flex items-center justify-center">
                             <span class="material-symbols-rounded">delete</span>

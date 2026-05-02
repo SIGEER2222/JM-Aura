@@ -45,10 +45,10 @@
             </div>
 
             <!-- Results Grid -->
-            <div v-else class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
-                <div v-for="item in searchResults" :key="item.album_id" 
+            <div v-else-if="visibleSearchResults.length" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
+                <div v-for="item in visibleSearchResults" :key="item.album_id" 
                      class="md-card overflow-hidden cursor-pointer group flex flex-col h-full transition-all duration-300"
-                     @click="viewDetails(item.album_id)">
+                     @click="openComicPage(item.album_id)">
                     <div class="aspect-[3/4] overflow-hidden relative bg-surface-variant">
                          <img :src="getCoverUrl(item)" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" alt="Cover">
                          
@@ -63,11 +63,21 @@
                             <p class="text-xs truncate max-w-[60%] text-on-surface-variant">{{ item.author }}</p>
                             <span class="text-[10px] font-bold px-2 py-1 bg-surface-variant rounded-full text-on-surface-variant">{{ item.category }}</span>
                         </div>
+                        <button type="button" @click.stop="dislikeComic(item)"
+                            class="mt-3 h-8 rounded-full bg-surface-container text-on-surface-variant hover:bg-error-container hover:text-on-error-container transition text-[11px] font-bold flex items-center justify-center gap-1">
+                            <span class="material-symbols-rounded text-base">thumb_down</span>
+                            不喜欢
+                        </button>
                     </div>
                 </div>
             </div>
             
             <!-- Pagination -->
+            <div v-else-if="searchResults.length > 0" class="md-card p-6 text-center opacity-70">
+                <div class="font-bold text-on-surface-variant">当前页结果已全部被过滤</div>
+                <div class="text-xs opacity-60 mt-2">关闭“过滤已看过”或清空“不喜欢”记录可重新显示</div>
+            </div>
+
             <div v-if="searchResults.length > 0" class="flex justify-center items-center gap-6 py-8">
                  <button @click="changePage(-1)" :disabled="currentPage <= 1" 
                     class="w-12 h-12 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center disabled:opacity-30 hover:bg-primary hover:text-on-primary transition">

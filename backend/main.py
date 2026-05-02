@@ -456,10 +456,10 @@ def v2_random(source: str):
 
 
 @app.get("/api/v2/{source}/also_viewed/{comic_id}")
-def v2_also_viewed(source: str, comic_id: str):
+def v2_also_viewed(source: str, comic_id: str, seed: int | None = None, limit: int = 24):
     try:
         p = get_provider(source)  # type: ignore[arg-type]
-        items = p.also_viewed(comic_id)
+        items = p.also_viewed(comic_id, seed=seed, limit=limit)
         return _v2_ok([x.model_dump() for x in items])
     except Exception as e:
         return _v2_err(e)
@@ -1228,6 +1228,19 @@ async def favicon():
 
     raise HTTPException(status_code=404, detail="Not found")
 
+
+# Custom StaticFiles with correct encoding
+from fastapi.staticfiles import StaticFiles as FastAPIStaticFiles
+
+class StaticFiles(FastAPIStaticFiles):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+    
+    async def get_response(self, path: str, scope):
+        response = await super().get_response(path, scope)
+        if response.headers.get("content-type") and "text/" in response.headers["content-type"]:
+            response.headers["content-type"] = response.headers["content-type"] + "; charset=utf-8"
+        return response
 
 app.mount("/", StaticFiles(directory=frontend_path), name="static")
 

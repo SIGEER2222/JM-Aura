@@ -1,0 +1,29 @@
+# Logs
+*.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Configuration files
+backend/config/cookies.json
+backend/config/jm.json
+config/op.yml
+
+# Compressed files
+*.zip
+*.tar.gz
+*.rar
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
