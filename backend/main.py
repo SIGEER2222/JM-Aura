@@ -5,9 +5,27 @@ import re
 import shutil
 import threading
 import time
+from datetime import datetime, timedelta
 from queue import Queue
 from typing import Any
 from urllib.parse import urlparse
+
+# ?
+_chapter_cache: dict[str, dict] = {}
+_chapter_cache_expire = timedelta(minutes=10)
+
+def _get_chapter_cache(photo_id: str) -> dict | None:
+    cached = _chapter_cache.get(photo_id)
+    if cached:
+        if datetime.now() - cached['time'] < _chapter_cache_expire:
+            return cached['data']
+    return None
+
+def _set_chapter_cache(photo_id: str, data: dict) -> None:
+    _chapter_cache[photo_id] = {
+        'data': data,
+        'time': datetime.now()
+    }
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException, UploadFile, File, Request
 from fastapi.responses import FileResponse, StreamingResponse
@@ -688,8 +706,25 @@ def get_album(album_id: str):
 
 
 @app.get("/api/chapter/{photo_id}")
-def get_chapter(photo_id: str, album_id: str | None = None, eps_index: int = 0):
+def get_chapter(photo_id: str, album_id: str | None = None, eps_index: int = 0, limit: int = 0, offset: int = 0):
     try:
+        # ???????????
+        cached_data = _get_chapter_cache(photo_id)
+        if cached_data is not None:
+            # ?????limit???????
+            if limit > 0:
+                all_images = cached_data.get("images") or []
+                total = len(all_images)
+                paginated_images = all_images[offset:offset + limit]
+                return {
+                    **cached_data,
+                    "images": paginated_images,
+                    "total_images": total,
+                    "offset": offset,
+                    "limit": limit
+                }
+            return cached_data
+        
         try:
             data = jm_service.get_chapter_detail(photo_id)
             images = data.get("images") or []
@@ -713,6 +748,23 @@ def get_chapter(photo_id: str, album_id: str | None = None, eps_index: int = 0):
             data = adapt_chapter_detail(chapter_raw, tpl_info, photo_id)
         data.setdefault("st", Status.Ok)
         data.setdefault("msg", "")
+        
+        # ????????
+        _set_chapter_cache(photo_id, data)
+        
+        # ?????limit???????
+        if limit > 0:
+            all_images = data.get("images") or []
+            total = len(all_images)
+            paginated_images = all_images[offset:offset + limit]
+            return {
+                **data,
+                "images": paginated_images,
+                "total_images": total,
+                "offset": offset,
+                "limit": limit
+            }
+        
         return data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -1031,7 +1083,7 @@ def send_comment(req: CommentSendRequest):
         msg = str(e) or "Failed to post comment"
         if msg.startswith("API Error:"):
             msg = msg[len("API Error:"):].strip()
-        if "å‹¿é‡å¤ç•™è¨€" in msg:
+        if "?" in msg:
             return err(Status.UserError, msg)
         return err(Status.Error, msg)
 

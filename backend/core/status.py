@@ -1,4 +1,4 @@
-class Status:
+﻿class Status:
     Ok = 1001
     Load = 1002
     Error = 1003

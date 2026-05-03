@@ -215,7 +215,11 @@ class ServerReq(object):
             try:
                 resp_json = response.json()
             except Exception:
-                return response.text
+                try:
+                    text = response.content.decode('gbk')
+                    resp_json = json.loads(text)
+                except Exception:
+                    return response.text
 
             if isinstance(resp_json, dict) and "code" in resp_json:
                 if resp_json.get("code") != 200:
@@ -253,7 +257,7 @@ class ToolUtil:
             parts.append(f"{urllib.parse.quote(str(k))}={urllib.parse.quote(str(v))}")
         return "&".join(parts)
 
-# è·å¾—é¦–é¡µ
+# »ñµÃÊ×Ò³
 class GetIndexInfoReq2(ServerReq):
     def __init__(self, page="0"):
         url = GlobalConfig.GetApiUrl() + "/promote"
@@ -267,7 +271,7 @@ class GetIndexInfoReq2(ServerReq):
 
         super(self.__class__, self).__init__(url, {}, method)
 
-# è·å¾—æœ€è¿‘æ›´æ–°
+# »ñµÃ×î½ü¸üĞÂ
 class GetLatestInfoReq2(ServerReq):
     def __init__(self, page="0"):
         url = GlobalConfig.GetApiUrl() + "/latest"
@@ -281,7 +285,7 @@ class GetLatestInfoReq2(ServerReq):
 
         super(self.__class__, self).__init__(url, {}, method)
 
-# æ£€æŸ¥æ›´æ–°
+# ¼ì²é¸üĞÂ
 class CheckUpdateReq(ServerReq):
     def __init__(self, url2, isPre=False):
         method = "GET"
@@ -295,7 +299,7 @@ class CheckUpdateReq(ServerReq):
         url += ToolUtil.DictToUrl(data)
         super(self.__class__, self).__init__(url, {}, method)
 
-# æ£€æŸ¥æ›´æ–°é…ç½®
+# ¼ì²é¸üĞÂÅäÖÃ
 class CheckUpdateConfigReq(ServerReq):
     def __init__(self, url2):
         method = "GET"
@@ -306,7 +310,7 @@ class CheckUpdateConfigReq(ServerReq):
         url += ToolUtil.DictToUrl(data)
         super(self.__class__, self).__init__(url, {}, method)
 
-# ç™»é™†
+# µÇÂ½
 class LoginReq2(ServerReq):
     def __init__(self, userId, passwd):
         method = "POST"
@@ -316,7 +320,7 @@ class LoginReq2(ServerReq):
         data["password"] = passwd
         super(self.__class__, self).__init__(url, ToolUtil.DictToUrl(data), method)
 
-# æ³¨å†Œ
+# ×¢²á
 class RegisterReq(ServerReq):
     def __init__(self, userId, email, passwd, passwd2, sex="Male",  ver=""):
         # [Male, Female]
@@ -338,7 +342,7 @@ class RegisterReq(ServerReq):
         super(self.__class__, self).__init__(url, ToolUtil.DictToUrl(data), method)
         # self.headers = self.GetWebHeader() # We might need web headers for this
 
-# æœ¬å­ä¿¡æ¯
+# ±¾×ÓĞÅÏ¢
 class GetBookInfoReq2(ServerReq):
     def __init__(self, bookId):
         self.bookId = bookId
@@ -353,7 +357,7 @@ class GetBookInfoReq2(ServerReq):
             url += "/?" + param
         super(self.__class__, self).__init__(url, {}, method)
 
-# è·å¾—scramble_id
+# »ñµÃscramble_id
 class GetBookEpsScrambleReq2(ServerReq):
     def __init__(self, bookId, epsIndex, epsId):
         self.bookId = bookId
@@ -372,7 +376,7 @@ class GetBookEpsScrambleReq2(ServerReq):
         super(self.__class__, self).__init__(url, {}, method)
         self.headers = self.GetHeader2(url, method)
 
-# ç« èŠ‚ä¿¡æ¯
+# ÕÂ½ÚĞÅÏ¢
 class GetBookEpsInfoReq2(ServerReq):
     def __init__(self, bookId, epsId):
         self.bookId = bookId
@@ -388,10 +392,10 @@ class GetBookEpsInfoReq2(ServerReq):
             url += "/?" + param
         super(self.__class__, self).__init__(url, {}, method)
 
-# æœç´¢è¯·æ±‚
+# ËÑË÷ÇëÇó
 class GetSearchReq2(ServerReq):
     def __init__(self, search, sort="mr", page=1):
-        # æœ€æ–°ï¼Œæœ€å¤šç‚¹å‡»ï¼Œæœ€å¤šå›¾ç‰‡, æœ€å¤šçˆ±å¿ƒ
+        # ×îĞÂ£¬×î¶àµã»÷£¬×î¶àÍ¼Æ¬, ×î¶à°®ĞÄ
         # o = [mr, mv, mp, tf]
 
         data = dict()
@@ -408,7 +412,7 @@ class GetSearchReq2(ServerReq):
         method = "GET"
         super(self.__class__, self).__init__(url, {}, method)
 
-# åˆ†é¡è¯·æ±‚
+# ·ÖîÇëÇó
 class GetCategoryReq2(ServerReq):
     def __init__(self):
         url = GlobalConfig.GetApiUrl() + "/categories"
@@ -419,13 +423,13 @@ class GetCategoryReq2(ServerReq):
         method = "GET"
         super(self.__class__, self).__init__(url, {}, method)
 
-# åˆ†é¡æœç´¢è¯·æ±‚
+# ·ÖîËÑË÷ÇëÇó
 class GetSearchCategoryReq2(ServerReq):
     def __init__(self, category="0", page=1, sort="mr", tag: str | None = None):
         # sort []&t=t&o=tf
-        # æœ€æ–°ï¼Œæ€»æ’è¡Œï¼Œæœˆæ’è¡Œï¼Œå‘¨æ’è¡Œï¼Œ æ—¥æ’è¡Œï¼Œæœ€å¤šå›¾ç‰‡, æœ€å¤šçˆ±å¿ƒ
+        # ×îĞÂ£¬×ÜÅÅĞĞ£¬ÔÂÅÅĞĞ£¬ÖÜÅÅĞĞ£¬ ÈÕÅÅĞĞ£¬×î¶àÍ¼Æ¬, ×î¶à°®ĞÄ
         # o = [mr, mv, mv_m, mv_w, mv_t, mp, tf]
-        # æœ€æ–°, åŒäºº, å•æœ¬, çŸ­ç¯‡ï¼Œ å…¶ä»–ï¼ŒéŸ©æ¼«ï¼Œ ç¾æ¼«ï¼Œ CosPlayï¼Œ 3D
+        # ×îĞÂ, Í¬ÈË, µ¥±¾, ¶ÌÆª£¬ ÆäËû£¬º«Âş£¬ ÃÀÂş£¬ CosPlay£¬ 3D
         # category = ["0", "doujin", "single", "short", "another", "hanman", "meiman", "doujin_cosplay", "3D"]
 
         url = GlobalConfig.GetApiUrl() + "/categories/filter"
@@ -448,10 +452,10 @@ class GetSearchCategoryReq2(ServerReq):
         method = "GET"
         super(self.__class__, self).__init__(url, {}, method)
 
-# è·å¾—æ”¶è—
+# »ñµÃÊÕ²Ø
 class GetFavoritesReq2(ServerReq):
     def __init__(self, page=1, sort="mr", fid=""):
-        # æ”¶è—æ—¶é—´, æ›´æ–°æ—¶é—´
+        # ÊÕ²ØÊ±¼ä, ¸üĞÂÊ±¼ä
         # o = [mr, mp]
         url = GlobalConfig.GetApiUrl() + "/favorite"
         method = "GET"
@@ -469,7 +473,7 @@ class GetFavoritesReq2(ServerReq):
 
         super(self.__class__, self).__init__(url, {}, method)
 
-# æ·»åŠ æ”¶è—æ–‡ä»¶å¤¹
+# Ìí¼ÓÊÕ²ØÎÄ¼ş¼Ğ
 class AddFavoritesFoldReq2(ServerReq):
     def __init__(self, name=""):
         url = GlobalConfig.GetApiUrl() + "/favorite_folder"
@@ -479,7 +483,7 @@ class AddFavoritesFoldReq2(ServerReq):
         data["type"] = "add"
         super(self.__class__, self).__init__(url, ToolUtil.DictToUrl(data), method)
 
-# åˆ é™¤æ”¶è—æ–‡ä»¶å¤¹
+# É¾³ıÊÕ²ØÎÄ¼ş¼Ğ
 class DelFavoritesFoldReq2(ServerReq):
     def __init__(self, fid=""):
         url = GlobalConfig.GetApiUrl() + "/favorite_folder"
@@ -489,7 +493,7 @@ class DelFavoritesFoldReq2(ServerReq):
         data["type"] = "del"
         super(self.__class__, self).__init__(url, ToolUtil.DictToUrl(data), method)
 
-# é‡å‘½åæ”¶è—æ–‡ä»¶å¤¹
+# ÖØÃüÃûÊÕ²ØÎÄ¼ş¼Ğ
 class RenameFavoritesFoldReq2(ServerReq):
     def __init__(self, fid="", name="", rename_type="rename"):
         url = GlobalConfig.GetApiUrl() + "/favorite_folder"
@@ -500,7 +504,7 @@ class RenameFavoritesFoldReq2(ServerReq):
         data["type"] = rename_type
         super(self.__class__, self).__init__(url, ToolUtil.DictToUrl(data), method)
 
-# ç§»åŠ¨æ”¶è—æ–‡ä»¶å¤¹
+# ÒÆ¶¯ÊÕ²ØÎÄ¼ş¼Ğ
 class MoveFavoritesFoldReq2(ServerReq):
     def __init__(self, bookId="", fid=""):
         url = GlobalConfig.GetApiUrl() + "/favorite_folder"
@@ -511,7 +515,7 @@ class MoveFavoritesFoldReq2(ServerReq):
         data["aid"] = bookId
         super(self.__class__, self).__init__(url, ToolUtil.DictToUrl(data), method)
 
-# æ·»åŠ æ”¶è—
+# Ìí¼ÓÊÕ²Ø
 class AddAndDelFavoritesReq2(ServerReq):
     def __init__(self, bookId=""):
         url = GlobalConfig.GetApiUrl() + "/favorite"
@@ -520,7 +524,7 @@ class AddAndDelFavoritesReq2(ServerReq):
         data["aid"] = bookId
         super(self.__class__, self).__init__(url, ToolUtil.DictToUrl(data), method)
 
-# è·å¾—è¯„è®º
+# »ñµÃÆÀÂÛ
 class GetCommentReq2(ServerReq):
     def __init__(self, bookId="", page="1", readMode="manhua"):
         self.bookId = bookId
@@ -537,7 +541,7 @@ class GetCommentReq2(ServerReq):
             url += "/?" + param
         super(self.__class__, self).__init__(url, {}, method)
 
-# è·å¾—è¯„è®º
+# »ñµÃÆÀÂÛ
 class GetMyCommentReq2(ServerReq):
     def __init__(self, uid, page="1"):
         self.uid = uid
@@ -553,7 +557,7 @@ class GetMyCommentReq2(ServerReq):
             url += "/?" + param
         super(self.__class__, self).__init__(url, {}, method)
 
-# å‘é€è¯„è®º
+# ·¢ËÍÆÀÂÛ
 class SendCommentReq2(ServerReq):
     def __init__(self, bookId="", comment="", cid=""):
         url = GlobalConfig.GetApiUrl() + "/comment"
@@ -565,7 +569,7 @@ class SendCommentReq2(ServerReq):
             data["comment_id"] = cid
         super(self.__class__, self).__init__(url, ToolUtil.DictToUrl(data), method)
 
-# è¯„è®ºç‚¹èµ
+# ÆÀÂÛµãÔŞ
 class LikeCommentReq2(ServerReq):
     def __init__(self, cid=""):
         url = GlobalConfig.GetApiUrl() + "/comment/like"
@@ -573,7 +577,7 @@ class LikeCommentReq2(ServerReq):
         data = {"cid": cid}
         super(self.__class__, self).__init__(url, ToolUtil.DictToUrl(data), method)
 
-# è·å–è§‚çœ‹è®°å½•
+# »ñÈ¡¹Û¿´¼ÇÂ¼
 class GetHistoryReq2(ServerReq):
     def __init__(self, page=1):
         url = GlobalConfig.GetApiUrl() + "/watch_list"
@@ -582,7 +586,7 @@ class GetHistoryReq2(ServerReq):
         data["page"] = page
         super(self.__class__, self).__init__(url, ToolUtil.DictToUrl(data), method)
 
-# Jcoinè´­ä¹°
+# Jcoin¹ºÂò
 class GetBuyComicsReq2(ServerReq):
     def __init__(self, bookId=""):
         url = GlobalConfig.GetApiUrl() + "/coin_buy_comics"
@@ -591,7 +595,7 @@ class GetBuyComicsReq2(ServerReq):
         data["id"] = bookId
         super(self.__class__, self).__init__(url, ToolUtil.DictToUrl(data), method)
 
-# è·å–å‘¨æ¨èåˆ†ç±»
+# »ñÈ¡ÖÜÍÆ¼ö·ÖÀà
 class GetWeekCategoriesReq2(ServerReq):
     def __init__(self, page=0):
         url = GlobalConfig.GetApiUrl() + "/week"
@@ -600,7 +604,7 @@ class GetWeekCategoriesReq2(ServerReq):
         data["page"] = page
         super(self.__class__, self).__init__(url, ToolUtil.DictToUrl(data), method)
 
-# è·å–å‘¨æ¨è
+# »ñÈ¡ÖÜÍÆ¼ö
 class GetWeekFilterReq2(ServerReq):
     def __init__(self, id, type, page=0):
         url = GlobalConfig.GetApiUrl() + "/week/filter?"
@@ -612,7 +616,7 @@ class GetWeekFilterReq2(ServerReq):
         url = url + ToolUtil.DictToUrl(data)
         super(self.__class__, self).__init__(url, {}, method)
 
-# è·å–æ·±å¤œé£Ÿå ‚
+# »ñÈ¡ÉîÒ¹Ê³ÌÃ
 class GetBlogsReq2(ServerReq):
     def __init__(self, blog_type="dinner", search_query="", page=1):
         url = GlobalConfig.GetApiUrl() + "/blogs?"
@@ -624,7 +628,7 @@ class GetBlogsReq2(ServerReq):
         url = url + ToolUtil.DictToUrl(data)
         super(self.__class__, self).__init__(url, {}, method)
 
-# è·å–æ·±å¤œé£Ÿå ‚
+# »ñÈ¡ÉîÒ¹Ê³ÌÃ
 class GetBlogInfoReq2(ServerReq):
     def __init__(self, id):
         url = GlobalConfig.GetApiUrl() + "/blog?"
@@ -634,7 +638,7 @@ class GetBlogInfoReq2(ServerReq):
         url = url + ToolUtil.DictToUrl(data)
         super(self.__class__, self).__init__(url, {}, method)
 
-# è·å–æ·±å¤œé£Ÿå ‚
+# »ñÈ¡ÉîÒ¹Ê³ÌÃ
 class GetBlogForumReq2(ServerReq):
     def __init__(self, bid, page=1, mode="blog"):
         url = GlobalConfig.GetApiUrl() + "/forum?"
@@ -646,14 +650,14 @@ class GetBlogForumReq2(ServerReq):
         url = url + ToolUtil.DictToUrl(data)
         super(self.__class__, self).__init__(url, {}, method)
 
-# è·å–ç­¾åˆ°ä¿¡æ¯
+# »ñÈ¡Ç©µ½ĞÅÏ¢
 class GetDailyReq2(ServerReq):
     def __init__(self, user_id):
         url = GlobalConfig.GetApiUrl() + "/daily?user_id=" + user_id
         method = "GET"
         super(self.__class__, self).__init__(url, {}, method)
 
-# ç­¾åˆ°
+# Ç©µ½
 class SignDailyReq2(ServerReq):
     def __init__(self, user_id, daily_id):
         url = GlobalConfig.GetApiUrl() + "/daily_chk"

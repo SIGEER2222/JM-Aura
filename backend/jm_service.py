@@ -1,4 +1,4 @@
-import os
+﻿import os
 import jmcomic
 import shutil
 import tempfile

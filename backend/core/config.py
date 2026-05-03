@@ -1,4 +1,4 @@
-class GlobalItem(object):
+﻿class GlobalItem(object):
     def __init__(self, default):
         self.value = default
         self.def_value = default

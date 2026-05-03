@@ -27,3 +27,7 @@ config/op.yml
 # OS
 .DS_Store
 Thumbs.db
+
+# Debug
+debug/
+debug_*.txt
