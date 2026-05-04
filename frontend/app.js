@@ -4097,8 +4097,11 @@ createApp({
             dislikedComicIds: {},
 
 
-
-            blockedTags: {},
+            blockedTags: {
+                'yaoi': true,
+                'bl': true,
+                '耽美': true
+            },
 
 
 

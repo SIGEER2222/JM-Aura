@@ -1,4 +1,4 @@
-from __future__ import annotations
+ï»¿from __future__ import annotations
 
 import os
 import re
@@ -10,7 +10,6 @@ from queue import Queue
 from typing import Any
 from urllib.parse import urlparse
 
-# ?
 _chapter_cache: dict[str, dict] = {}
 _chapter_cache_expire = timedelta(minutes=10)
 
@@ -1083,7 +1082,7 @@ def send_comment(req: CommentSendRequest):
         msg = str(e) or "Failed to post comment"
         if msg.startswith("API Error:"):
             msg = msg[len("API Error:"):].strip()
-        if "?" in msg:
+        if "æ•æ„Ÿ" in msg or "éæ³•" in msg or "è¿è§„" in msg:
             return err(Status.UserError, msg)
         return err(Status.Error, msg)
 
