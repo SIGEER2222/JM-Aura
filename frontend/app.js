@@ -2683,6 +2683,35 @@ createApp({
 
         },
 
+        autoDislikeByBlockedTags() {
+            const allComics = [];
+            if (Array.isArray(this.searchResults)) allComics.push(...this.searchResults);
+            if (Array.isArray(this.jmLatestItems)) allComics.push(...this.jmLatestItems);
+            if (Array.isArray(this.jmLeaderboardItems)) allComics.push(...this.jmLeaderboardItems);
+            if (Array.isArray(this.jmCategoryItems)) allComics.push(...this.jmCategoryItems);
+            if (Array.isArray(this.jmFavItems)) allComics.push(...this.jmFavItems);
+            if (Array.isArray(this.jmHistoryItems)) allComics.push(...this.jmHistoryItems);
+            if (Array.isArray(this.homeData)) allComics.push(...this.homeData);
+            if (this.jmRandomPreview) allComics.push(this.jmRandomPreview);
+
+            let count = 0;
+            for (const comic of allComics) {
+                const id = this.getComicItemId(comic);
+                if (!id || this.isComicDisliked(comic)) continue;
+                if (this.isComicBlockedByTag(comic)) {
+                    this.dislikedComicIds = { ...(this.dislikedComicIds || {}), [id]: true };
+                    count++;
+                }
+            }
+
+            if (count > 0) {
+                this.saveDislikedComics();
+                this.showToast(`已将 ${count} 个含屏蔽tag的漫画加入不喜欢`, 'success');
+            } else {
+                this.showToast('没有找到含屏蔽tag的漫画', 'info');
+            }
+        },
+
         searchByTag(tag) {
 
             const q = String(tag || '').trim();

@@ -319,7 +319,6 @@ download:
             "index": photo.index
         }
 
-
     def download_album(self, album_id: str, chapter_ids: list[str] = None):
         # This is blocking. In a real app we should run this in a background task.
         # For now, we'll run it and return.
