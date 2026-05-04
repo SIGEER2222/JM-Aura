@@ -84,15 +84,9 @@ from backend.models.schemas import ChapterDetail, ChapterPage, ComicDetail, Comi
 
 from backend.providers.base import ComicProvider, ProviderError
 
-
-
-
-
 class JmProvider(ComicProvider):
 
     source = "jm"
-
-
 
     def login(self, username: str, password: str) -> dict[str, Any]:
 
@@ -118,13 +112,9 @@ class JmProvider(ComicProvider):
 
         return data if isinstance(data, dict) else {"raw": data}
 
-
-
     def register(self, username: str, password: str, **kwargs: Any) -> dict[str, Any]:
 
         raise ProviderError("JM register not supported in app API", status=400)
-
-
 
     def profile(self) -> UserProfile:
 
@@ -143,8 +133,6 @@ class JmProvider(ComicProvider):
             raw=raw,
 
         )
-
-
 
     def check_in(self) -> dict[str, Any]:
 
@@ -194,8 +182,6 @@ class JmProvider(ComicProvider):
 
         return res if isinstance(res, dict) else {"raw": res}
 
-
-
     def search(self, q: str, page: int = 1, **kwargs: Any) -> list[ComicSummary]:
 
         raw = GetSearchReq2(q, page=page).execute()
@@ -240,8 +226,6 @@ class JmProvider(ComicProvider):
 
         return out
 
-
-
     def categories(self) -> list[dict[str, Any]]:
 
         raw = GetCategoryReq2().execute()
@@ -266,8 +250,6 @@ class JmProvider(ComicProvider):
             return filtered
 
         return []
-
-
 
     def leaderboard(self, **kwargs: Any) -> list[ComicSummary]:
         category = kwargs.get("category") or "0"
@@ -309,8 +291,6 @@ class JmProvider(ComicProvider):
         
         return out
 
-
-
     def random(self, **kwargs: Any) -> ComicSummary | None:
 
         base = GlobalConfig.GetImgUrl()
@@ -318,8 +298,6 @@ class JmProvider(ComicProvider):
         def cover_url(aid: str) -> str:
 
             return f"{base}/media/albums/{aid}.jpg" if isinstance(base, str) and base else ""
-
-
 
         def get_cat_id(c: Any) -> str:
 
@@ -345,8 +323,6 @@ class JmProvider(ComicProvider):
 
             return "0"
 
-
-
         try:
 
             max_page = int(kwargs.get("max_page") or 50)
@@ -363,13 +339,9 @@ class JmProvider(ComicProvider):
 
             tries = 8
 
-
-
         max_page = max(1, min(200, max_page))
 
         tries = max(1, min(20, tries))
-
-
 
         try:
 
@@ -386,8 +358,6 @@ class JmProvider(ComicProvider):
         except Exception:
 
             cat_ids = ["0"]
-
-
 
         sorts = ["mr", "tf", "mv", "mp"]
 
@@ -410,8 +380,6 @@ class JmProvider(ComicProvider):
             except Exception:
 
                 continue
-
-
 
         raw = GetLatestInfoReq2("0").execute()
 
@@ -448,8 +416,6 @@ class JmProvider(ComicProvider):
             return ComicSummary(source="jm", comic_id=aid2, title=str(it2.get("title") or ""), author=it2.get("author"), cover_url=str(it2.get("image") or "").strip() or cover_url(aid2), raw=it2)
 
         return None
-
-
 
     def also_viewed(self, comic_id: str, **kwargs: Any) -> list[ComicSummary]:
         def cover_url(aid: str) -> str:
@@ -745,31 +711,21 @@ class JmProvider(ComicProvider):
 
         return ChapterDetail(source="jm", chapter_id=str(chapter_id), title=data.get("title"), images=imgs, raw=data)
 
-
-
     def comments(self, comic_id: str, page: int = 1, **kwargs: Any) -> dict[str, Any]:
 
         return GetCommentReq2(comic_id, page=page).execute()
-
-
 
     def send_comment(self, comic_id: str, content: str, reply_to: str | None = None, **kwargs: Any) -> dict[str, Any]:
 
         return SendCommentReq2(comic_id, content, comment_id=reply_to or "").execute()
 
-
-
     def like_comment(self, comment_id: str, **kwargs: Any) -> dict[str, Any]:
 
         return LikeCommentReq2(comment_id).execute()
 
-
-
     def toggle_favorite(self, comic_id: str, **kwargs: Any) -> dict[str, Any]:
 
         return AddAndDelFavoritesReq2(comic_id).execute()
-
-
 
     def like_comic(self, comic_id: str, **kwargs: Any) -> dict[str, Any]:
 

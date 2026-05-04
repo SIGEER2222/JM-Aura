@@ -66,18 +66,15 @@ from backend.providers.base import NeedLoginError, ProviderError
 from backend.providers.jm_provider import JmProvider
 from backend.providers.registry import get_provider, register_provider
 
-
 app = FastAPI(title="JM-Dashboard")
 
 register_provider("jm", JmProvider())
-
 
 @app.get("/api/client-info")
 def client_info(request: Request):
     xff = (request.headers.get("x-forwarded-for") or "").split(",")[0].strip()
     ip = xff or (request.client.host if request.client else "")
     return ok({"ip": ip}, msg="")
-
 
 @app.get("/api/jm/debug")
 def jm_debug():
@@ -90,16 +87,13 @@ def jm_debug():
         msg="",
     )
 
-
 class ConfigRequest(BaseModel):
     username: str
     password: str
 
-
 class V2AuthRequest(BaseModel):
     username: str
     password: str
-
 
 class V2RegisterRequest(BaseModel):
     username: str
@@ -108,27 +102,22 @@ class V2RegisterRequest(BaseModel):
     gender: str | None = None
     birthday: str | None = None
 
-
 class V2UpdateProfileRequest(BaseModel):
     signature: str
-
 
 class V2UpdatePasswordRequest(BaseModel):
     old_password: str
     new_password: str
 
-
 class V2SendCommentRequest(BaseModel):
     content: str
     reply_to: str | None = None
-
 
 class V2DownloadTaskRequest(BaseModel):
     comic_id: str
     comic_title: str | None = None
     chapters: list[dict[str, str]] | None = None
     include_all: bool = False
-
 
 class DownloadRequest(BaseModel):
     album_id: str
@@ -138,17 +127,14 @@ class DownloadChapter(BaseModel):
     id: str
     title: str = ""
 
-
 class DownloadTaskCreateRequest(BaseModel):
     album_id: str
     album_title: str = ""
     chapters: list[DownloadChapter] = []
 
-
 class FavoriteToggleRequest(BaseModel):
     album_id: str
     desired_state: bool | None = None
-
 
 class FavoriteFolderRequest(BaseModel):
     type: str
@@ -156,16 +142,13 @@ class FavoriteFolderRequest(BaseModel):
     folder_id: str | None = None
     album_id: str | None = None
 
-
 class CommentSendRequest(BaseModel):
     album_id: str
     comment: str
     comment_id: str | None = None
 
-
 class CommentLikeRequest(BaseModel):
     cid: str
-
 
 class DownloadManager:
     def __init__(self, max_concurrent: int = 3):
@@ -188,10 +171,8 @@ class DownloadManager:
                 self._sema.release()
                 self.queue.task_done()
 
-
 download_manager = DownloadManager(max_concurrent=3)
 download_task_manager = DownloadTaskManager(base_dir=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "downloads", "tasks"))
-
 
 @app.post("/api/config")
 async def update_config(config: ConfigRequest):
@@ -228,7 +209,6 @@ async def update_config(config: ConfigRequest):
             set_user_id(uid)
 
     return {"status": "success", "message": "Login successful and configuration updated", "st": Status.Ok, "msg": ""}
-
 
 @app.post("/api/session/relogin")
 async def session_relogin(req: V2AuthRequest):
@@ -273,7 +253,6 @@ def _get_saved_jm_credentials() -> tuple[str, str]:
     except Exception:
         return "", ""
 
-
 def _relogin_from_saved_config() -> bool:
     u, p = _get_saved_jm_credentials()
     if not u or not p:
@@ -306,7 +285,6 @@ def _relogin_from_saved_config() -> bool:
     except Exception:
         return False
 
-
 @app.get("/api/config")
 async def get_config():
     data = jm_service.get_config()
@@ -314,7 +292,6 @@ async def get_config():
         data.setdefault("st", Status.Ok)
         data.setdefault("msg", "")
     return data
-
 
 @app.post("/api/logout")
 async def logout():
@@ -325,10 +302,8 @@ async def logout():
         return {"status": "success", "message": "Logged out", "st": Status.Ok, "msg": ""}
     raise HTTPException(status_code=500, detail="Logout failed")
 
-
 def _v2_ok(data: Any) -> dict[str, Any]:
     return ok(data, msg="")
-
 
 def _v2_err(e: Exception) -> dict[str, Any]:
     if isinstance(e, NeedLoginError):
@@ -339,7 +314,6 @@ def _v2_err(e: Exception) -> dict[str, Any]:
         return err(Status.Error, str(e))
     return err(Status.Error, str(e))
 
-
 @app.post("/api/v2/{source}/auth/login")
 def v2_login(source: str, req: V2AuthRequest):
     try:
@@ -347,7 +321,6 @@ def v2_login(source: str, req: V2AuthRequest):
         return _v2_ok(p.login(req.username, req.password))
     except Exception as e:
         return _v2_err(e)
-
 
 @app.post("/api/v2/{source}/auth/register")
 def v2_register(source: str, req: V2RegisterRequest):
@@ -357,7 +330,6 @@ def v2_register(source: str, req: V2RegisterRequest):
     except Exception as e:
         return _v2_err(e)
 
-
 @app.get("/api/v2/{source}/user/profile")
 def v2_profile(source: str):
     try:
@@ -366,7 +338,6 @@ def v2_profile(source: str):
     except Exception as e:
         return _v2_err(e)
 
-
 @app.post("/api/v2/{source}/user/checkin")
 def v2_checkin(source: str):
     try:
@@ -374,7 +345,6 @@ def v2_checkin(source: str):
         return _v2_ok(p.check_in())
     except Exception as e:
         return _v2_err(e)
-
 
 @app.put("/api/v2/{source}/user/profile")
 def v2_update_profile(source: str, req: V2UpdateProfileRequest):
@@ -387,7 +357,6 @@ def v2_update_profile(source: str, req: V2UpdateProfileRequest):
     except Exception as e:
         return _v2_err(e)
 
-
 @app.put("/api/v2/{source}/user/password")
 def v2_update_password(source: str, req: V2UpdatePasswordRequest):
     try:
@@ -398,7 +367,6 @@ def v2_update_password(source: str, req: V2UpdatePasswordRequest):
         return _v2_ok(fn(req.old_password, req.new_password))
     except Exception as e:
         return _v2_err(e)
-
 
 @app.put("/api/v2/{source}/user/avatar")
 def v2_update_avatar(source: str, file: UploadFile = File(...)):
@@ -413,7 +381,6 @@ def v2_update_avatar(source: str, file: UploadFile = File(...)):
     except Exception as e:
         return _v2_err(e)
 
-
 @app.get("/api/v2/{source}/categories")
 def v2_categories(source: str):
     try:
@@ -421,7 +388,6 @@ def v2_categories(source: str):
         return _v2_ok(p.categories())
     except Exception as e:
         return _v2_err(e)
-
 
 @app.get("/api/v2/{source}/search")
 def v2_search(
@@ -451,7 +417,6 @@ def v2_search(
     except Exception as e:
         return _v2_err(e)
 
-
 @app.get("/api/v2/{source}/leaderboard")
 def v2_leaderboard(source: str, days: str | None = None, category: str | None = None, page: int = 1, sort: str | None = None, tag: str | None = None):
     try:
@@ -460,7 +425,6 @@ def v2_leaderboard(source: str, days: str | None = None, category: str | None = 
         return _v2_ok([x.model_dump() for x in items])
     except Exception as e:
         return _v2_err(e)
-
 
 @app.get("/api/v2/{source}/random")
 def v2_random(source: str):
@@ -471,7 +435,6 @@ def v2_random(source: str):
     except Exception as e:
         return _v2_err(e)
 
-
 @app.get("/api/v2/{source}/also_viewed/{comic_id}")
 def v2_also_viewed(source: str, comic_id: str, seed: int | None = None, limit: int = 24):
     try:
@@ -480,7 +443,6 @@ def v2_also_viewed(source: str, comic_id: str, seed: int | None = None, limit: i
         return _v2_ok([x.model_dump() for x in items])
     except Exception as e:
         return _v2_err(e)
-
 
 @app.get("/api/v2/{source}/comic/{comic_id}")
 def v2_comic_detail(source: str, comic_id: str):
@@ -491,7 +453,6 @@ def v2_comic_detail(source: str, comic_id: str):
     except Exception as e:
         return _v2_err(e)
 
-
 @app.get("/api/v2/{source}/chapter/{chapter_id}")
 def v2_chapter_detail(source: str, chapter_id: str, comic_id: str | None = None, ep_id: str | None = None, page: int = 1):
     try:
@@ -501,7 +462,6 @@ def v2_chapter_detail(source: str, chapter_id: str, comic_id: str | None = None,
     except Exception as e:
         return _v2_err(e)
 
-
 @app.get("/api/v2/{source}/comic/{comic_id}/comments")
 def v2_comments(source: str, comic_id: str, page: int = 1):
     try:
@@ -509,7 +469,6 @@ def v2_comments(source: str, comic_id: str, page: int = 1):
         return _v2_ok(p.comments(comic_id, page=page))
     except Exception as e:
         return _v2_err(e)
-
 
 @app.post("/api/v2/{source}/comic/{comic_id}/comments")
 def v2_send_comment(source: str, comic_id: str, req: V2SendCommentRequest):
@@ -519,7 +478,6 @@ def v2_send_comment(source: str, comic_id: str, req: V2SendCommentRequest):
     except Exception as e:
         return _v2_err(e)
 
-
 @app.post("/api/v2/{source}/comment/{comment_id}/like")
 def v2_like_comment(source: str, comment_id: str):
     try:
@@ -527,7 +485,6 @@ def v2_like_comment(source: str, comment_id: str):
         return _v2_ok(p.like_comment(comment_id))
     except Exception as e:
         return _v2_err(e)
-
 
 @app.post("/api/v2/{source}/comic/{comic_id}/favorite")
 def v2_toggle_favorite(source: str, comic_id: str):
@@ -537,7 +494,6 @@ def v2_toggle_favorite(source: str, comic_id: str):
     except Exception as e:
         return _v2_err(e)
 
-
 @app.post("/api/v2/{source}/comic/{comic_id}/like")
 def v2_like_comic(source: str, comic_id: str):
     try:
@@ -545,7 +501,6 @@ def v2_like_comic(source: str, comic_id: str):
         return _v2_ok(p.like_comic(comic_id))
     except Exception as e:
         return _v2_err(e)
-
 
 @app.post("/api/v2/{source}/download/tasks")
 def v2_create_download_task(source: str, req: V2DownloadTaskRequest):
@@ -579,7 +534,6 @@ def v2_create_download_task(source: str, req: V2DownloadTaskRequest):
     except Exception as e:
         return _v2_err(e)
 
-
 @app.get("/api/v2/{source}/download/tasks/{task_id}")
 def v2_get_download_task(source: str, task_id: str):
     try:
@@ -595,7 +549,6 @@ def v2_get_download_task(source: str, task_id: str):
     except Exception as e:
         return _v2_err(e)
 
-
 @app.get("/api/v2/{source}/download/tasks/{task_id}/download")
 def v2_download_task_zip(source: str, task_id: str):
     if source == "jm":
@@ -604,7 +557,6 @@ def v2_download_task_zip(source: str, task_id: str):
             raise HTTPException(status_code=404, detail="Zip not available")
         return FileResponse(task.zip_path, filename=os.path.basename(task.zip_path))
     raise HTTPException(status_code=400, detail="Unknown source")
-
 
 @app.post("/api/v2/cache/cleanup")
 def v2_cache_cleanup(keep_days: int = 7):
@@ -637,7 +589,6 @@ def v2_cache_cleanup(keep_days: int = 7):
                 removed_dirs += 1
     return ok({"removed_dirs": removed_dirs, "removed_work": removed_work}, msg="")
 
-
 @app.get("/api/promote")
 def get_promote(page: str = "0"):
     try:
@@ -645,14 +596,12 @@ def get_promote(page: str = "0"):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
 @app.get("/api/latest")
 def get_latest(page: str = "0"):
     try:
         return GetLatestInfoReq2(page).execute()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
 
 @app.get("/api/search")
 def search(q: str, page: int = 1):
@@ -686,7 +635,6 @@ def search(q: str, page: int = 1):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
 @app.get("/api/album/{album_id}")
 def get_album(album_id: str):
     try:
@@ -702,7 +650,6 @@ def get_album(album_id: str):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
 
 @app.get("/api/chapter/{photo_id}")
 def get_chapter(photo_id: str, album_id: str | None = None, eps_index: int = 0, limit: int = 0, offset: int = 0):
@@ -768,7 +715,6 @@ def get_chapter(photo_id: str, album_id: str | None = None, eps_index: int = 0, 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
 @app.get("/api/favorites")
 def get_favorites(page: int = 1, folder_id: str = "0"):
     def _run() -> dict:
@@ -794,7 +740,6 @@ def get_favorites(page: int = 1, folder_id: str = "0"):
         if "HTTP 401" in str(e):
             return {"content": [], "total": 0, "pages": 1, "folders": [], "st": Status.NotLogin, "msg": "Not logged in"}
         raise HTTPException(status_code=500, detail=str(e))
-
 
 @app.post("/api/favorite/toggle")
 def favorite_toggle(req: FavoriteToggleRequest):
@@ -837,7 +782,6 @@ def favorite_toggle(req: FavoriteToggleRequest):
         if "HTTP 401" in str(e):
             return err(Status.NotLogin, "Not logged in")
         return err(Status.Error, str(e))
-
 
 @app.post("/api/favorite_folder")
 def favorite_folder(req: FavoriteFolderRequest):
@@ -1055,7 +999,6 @@ def favorite_folder(req: FavoriteFolderRequest):
             return err(Status.NotLogin, "Not logged in")
         return err(Status.Error, str(e))
 
-
 @app.get("/api/comments")
 def get_comments(album_id: str = "", page: int = 1, mode: str = "manhua"):
     try:
@@ -1065,7 +1008,6 @@ def get_comments(album_id: str = "", page: int = 1, mode: str = "manhua"):
         if "HTTP 401" in str(e):
             return err(Status.NotLogin, "Not logged in")
         return err(Status.Error, str(e))
-
 
 @app.post("/api/comment")
 def send_comment(req: CommentSendRequest):
@@ -1086,7 +1028,6 @@ def send_comment(req: CommentSendRequest):
             return err(Status.UserError, msg)
         return err(Status.Error, msg)
 
-
 @app.post("/api/comment/like")
 def like_comment(req: CommentLikeRequest):
     try:
@@ -1104,7 +1045,6 @@ def like_comment(req: CommentLikeRequest):
             msg = msg[len("API Error:"):].strip()
         return err(Status.Error, msg)
 
-
 @app.get("/api/history")
 def get_history(page: int = 1):
     try:
@@ -1115,7 +1055,6 @@ def get_history(page: int = 1):
             return err(Status.NotLogin, "Not logged in")
         return err(Status.Error, str(e))
 
-
 @app.get("/api/task/promote")
 def task_promote(page: str = "0"):
     try:
@@ -1124,7 +1063,6 @@ def task_promote(page: str = "0"):
     except Exception as e:
         return err(Status.Error, str(e))
 
-
 @app.get("/api/task/latest")
 def task_latest(page: str = "0"):
     try:
@@ -1132,7 +1070,6 @@ def task_latest(page: str = "0"):
         return ok(data, msg="")
     except Exception as e:
         return err(Status.Error, str(e))
-
 
 @app.get("/api/image-proxy")
 def image_proxy(url: str):
@@ -1159,7 +1096,6 @@ def image_proxy(url: str):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
 
 @app.get("/api/chapter_image/{photo_id}/{image_name}")
 def chapter_image_proxy(photo_id: str, image_name: str, domain: str | None = None):
@@ -1201,14 +1137,12 @@ def chapter_image_proxy(photo_id: str, image_name: str, domain: str | None = Non
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
 def cleanup_file(path: str):
     try:
         if os.path.exists(path):
             os.remove(path)
     except Exception:
         return
-
 
 @app.get("/api/download_zip")
 async def download_zip(album_id: str, background_tasks: BackgroundTasks):
@@ -1219,12 +1153,10 @@ async def download_zip(album_id: str, background_tasks: BackgroundTasks):
     background_tasks.add_task(cleanup_file, zip_path)
     return FileResponse(zip_path, filename=f"album_{album_id}.zip", media_type="application/zip")
 
-
 @app.post("/api/download")
 async def download_album(req: DownloadRequest):
     download_manager.add_task(req.album_id, req.chapter_ids)
     return {"status": "success", "message": f"Download task for {req.album_id} queued"}
-
 
 @app.post("/api/download/tasks")
 def create_download_task(req: DownloadTaskCreateRequest):
@@ -1237,14 +1169,12 @@ def create_download_task(req: DownloadTaskCreateRequest):
     except Exception as e:
         return err(Status.Error, str(e))
 
-
 @app.get("/api/download/tasks/{task_id}")
 def get_download_task(task_id: str):
     task = download_task_manager.get_task(task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
     return ok(task.to_public(), msg="")
-
 
 @app.get("/api/download/tasks/{task_id}/download")
 def download_task_zip(task_id: str):
@@ -1257,15 +1187,12 @@ def download_task_zip(task_id: str):
         raise HTTPException(status_code=404, detail="File not found")
     return FileResponse(task.zip_path, filename=os.path.basename(task.zip_path), media_type="application/zip")
 
-
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 frontend_path = os.path.join(project_root, "frontend")
-
 
 @app.get("/")
 async def read_index():
     return FileResponse(os.path.join(frontend_path, "index.html"))
-
 
 @app.get("/favicon.ico", include_in_schema=False)
 async def favicon():
@@ -1278,7 +1205,6 @@ async def favicon():
         return FileResponse(frontend_favicon_path, media_type="image/x-icon")
 
     raise HTTPException(status_code=404, detail="Not found")
-
 
 # Custom StaticFiles with correct encoding
 from fastapi.staticfiles import StaticFiles as FastAPIStaticFiles
@@ -1294,7 +1220,6 @@ class StaticFiles(FastAPIStaticFiles):
         return response
 
 app.mount("/", StaticFiles(directory=frontend_path), name="static")
-
 
 if __name__ == "__main__":
     import uvicorn
